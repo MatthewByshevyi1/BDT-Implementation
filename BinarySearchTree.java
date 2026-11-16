@@ -14,30 +14,104 @@ public class BinarySearchTree<T extends Comparable<T>> implements BSTInterface<T
     // Creates an empty Binary Search Tree object
     public BinarySearchTree()
     {
+        root = null;
     }
 
     // Returns true if this BST is empty; otherwise, returns false.
     public boolean isEmpty()
     {
-        return false;
+        return root == null;
     }
 
     // Returns the number of elements in this BST.
     public int size()
     {
-        return -1;
+        if (root == null) {
+            return 0;
+        }
+        else {
+            ArrayStack<BinaryNode<T>> nodes = new ArrayStack<BinaryNode<T>>();
+            nodes.push(root);
+
+            int size = 0;
+
+            while (!nodes.empty()) {
+                BinaryNode<T> curr = null;
+                try {
+                    curr = nodes.pop();
+                    size++;
+                } catch (StackUnderflowException e) {}
+
+                if (curr.getRight() != null) {
+                    nodes.push(curr.getRight());
+                }
+                if (curr.getLeft() != null) {
+                    nodes.push(curr.getLeft());
+                }
+            }
+            return size;
+        }
     }
 
     // Adds element to this BST. The tree retains its BST property.
     public void add (T element)
     {
+        if (root == null) {
+            root = new BinaryNode<T>(element);
+            return;
+        }
+
+        BinaryNode<T> neW = new BinaryNode<T>(element);
+
+        BinaryNode<T> current = root;
+        while(true) {
+            if (element.compareTo(current.getInfo()) < 0) {
+
+                if (current.getLeft() == null) {
+                    current.setLeft(neW);
+                    break;
+                }
+                else {
+                    current = current.getLeft();
+                }
+            }
+            else if (element.compareTo(current.getInfo()) >= 0) {
+                if (current.getRight() == null) {
+                    current.setRight(neW);
+                    break;
+                }
+                else {
+                    current = current.getRight();
+                }
+
+            }
+        }
     }
 
     // Returns true if this BST contains an element e such that 
     // e.compareTo(element) == 0; otherwise, returns false.
     public boolean contains (T element)
     {
-        return false;
+        if (root == null) {
+            return false;
+        }
+        else {
+            BinaryNode<T> curr = root;
+
+            while (curr != null) {
+
+                if (curr.getInfo().compareTo(element) == 0) {
+                    return true;
+                }
+                else if (curr.getInfo().compareTo(element) < 0) {
+                    curr = curr.getRight();
+                }
+                else {
+                    curr = curr.getLeft();
+                }
+            }
+            return false;
+        }
     }
 
     // Returns a graphical representation of the tree
