@@ -137,7 +137,28 @@ public class BinarySearchTree<T extends Comparable<T>> implements BSTInterface<T
     // Returns a list of elements from a preorder traversal
     public List<T> preorderTraverse()
     {
-        return null;
+        
+        List<T> list = new ArrayList<T>();
+
+        ArrayStack<BinaryNode<T>> nodes = new ArrayStack<BinaryNode<T>>();
+        nodes.push(root);
+
+        while (!nodes.empty()) {
+            BinaryNode<T> curr = null;
+            try {
+                curr = nodes.pop();
+                list.add(curr.getInfo());
+            } catch (StackUnderflowException e) {}
+
+            if (curr.getRight() != null) {
+                nodes.push(curr.getRight());
+            }
+            if (curr.getLeft() != null) {
+                    nodes.push(curr.getLeft());
+            }
+        }
+
+        return list;
     }
 
     // Returns a list of elements from an inorder traversal
