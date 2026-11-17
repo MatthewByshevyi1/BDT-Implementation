@@ -137,7 +137,6 @@ public class BinarySearchTree<T extends Comparable<T>> implements BSTInterface<T
     // Returns a list of elements from a preorder traversal
     public List<T> preorderTraverse()
     {
-        
         List<T> list = new ArrayList<T>();
 
         ArrayStack<BinaryNode<T>> nodes = new ArrayStack<BinaryNode<T>>();
@@ -164,13 +163,62 @@ public class BinarySearchTree<T extends Comparable<T>> implements BSTInterface<T
     // Returns a list of elements from an inorder traversal
     public List<T> inorderTraverse()
     {
-        return null;
+        List<T> list = new ArrayList<T>();
+
+        ArrayStack<BinaryNode<T>> nodes = new ArrayStack<BinaryNode<T>>();
+        BinaryNode<T> curr = root;
+
+        while (!nodes.empty() || curr != null) {
+            if (curr != null) {
+                nodes.push(curr);
+                curr = curr.getLeft();
+                continue;
+            }
+
+            try {
+                curr = nodes.pop();
+            } catch (StackUnderflowException e) {}
+            list.add(curr.getInfo());
+            
+            curr = curr.getRight();
+        }
+
+        return list;
     }
 
     // Returns a list of elements from a postorder traversal
     public List<T> postorderTraverse()
     {
-        return null;
+        List<T> list = new ArrayList<T>();
+
+        ArrayStack<BinaryNode<T>> nodes = new ArrayStack<BinaryNode<T>>();
+        BinaryNode<T> curr = root;
+
+        while (!nodes.empty() || curr != null) {
+            if (curr != null) {
+                nodes.push(curr);
+                curr = curr.getLeft();
+                continue;
+            }
+
+            try {
+                curr = nodes.pop();
+                list.add(curr.getInfo());
+                curr = nodes.peek();
+            } catch (StackUnderflowException e) {}
+
+            if (curr.getRight() != null) {
+                curr = curr.getRight();
+                nodes.push(curr);
+            }
+            
+            while (curr.getLeft() == null && curr.getRight() != null) {
+                curr = curr.getRight();
+                nodes.push(curr);
+            }
+        }
+
+        return list;
     }
 
     // Removes an element e from this BST such that e.compareTo(element) == 0
