@@ -139,6 +139,10 @@ public class BinarySearchTree<T extends Comparable<T>> implements BSTInterface<T
     {
         List<T> list = new ArrayList<T>();
 
+        if (root == null) {
+            return list;
+        }
+
         ArrayStack<BinaryNode<T>> nodes = new ArrayStack<BinaryNode<T>>();
         nodes.push(root);
 
@@ -192,7 +196,9 @@ public class BinarySearchTree<T extends Comparable<T>> implements BSTInterface<T
         List<T> list = new ArrayList<T>();
 
         ArrayStack<BinaryNode<T>> nodes = new ArrayStack<BinaryNode<T>>();
+        
         BinaryNode<T> curr = root;
+        BinaryNode<T> previous = null;
 
         while (!nodes.empty() || curr != null) {
             if (curr != null) {
@@ -202,20 +208,17 @@ public class BinarySearchTree<T extends Comparable<T>> implements BSTInterface<T
             }
 
             try {
-                curr = nodes.pop();
-                list.add(curr.getInfo());
                 curr = nodes.peek();
-            } catch (StackUnderflowException e) {}
 
-            if (curr.getRight() != null) {
-                curr = curr.getRight();
-                nodes.push(curr);
-            }
-            
-            while (curr.getLeft() == null && curr.getRight() != null) {
-                curr = curr.getRight();
-                nodes.push(curr);
-            }
+                if (curr.getRight() != null && previous != curr.getRight()) {
+                    curr = curr.getRight();
+                }
+                else {
+                    list.add(curr.getInfo());
+                    previous = nodes.pop();
+                    curr = null;
+                }
+            } catch (StackUnderflowException e) {}
         }
 
         return list;
@@ -224,10 +227,140 @@ public class BinarySearchTree<T extends Comparable<T>> implements BSTInterface<T
     // Removes an element e from this BST such that e.compareTo(element) == 0
     public void remove (T element)
     {
+        BinaryNode<T> curr = root;
+        BinaryNode<T> previous = null;
+        int lastDir = 0;
+
+        while (curr != null) {
+
+            if (curr.getInfo().compareTo(element) == 0) {
+                break;
+            }
+            else if (curr.getInfo().compareTo(element) < 0) {
+                previous = curr;
+                curr = curr.getRight();
+                lastDir = 1;
+            }
+            else {
+                previous = curr;
+                curr = curr.getLeft();
+                lastDir = -1;
+            }
+        }
+        
+        if (curr == null) {
+            return;
+        }
+        else if (previous == null) {
+            if (root.getRight() == null && root.getLeft() == null) {
+                root = null;
+            }
+            else if (root.getRight() == null && root.getLeft() != null) {
+                root = root.getLeft();
+            }
+            else if (root.getLeft() == null && root.getRight() != null) {
+                root = root.getRight();
+            }
+            else {
+
+                BinaryNode<T> replacement = root.getLeft();
+                BinaryNode<T> parent = root;
+
+                while (replacement.getRight() != null) {
+                    parent = replacement;
+                    replacement = replacement.getRight();
+                } 
+
+                if (parent == root) {
+                    parent.setLeft(replacement.getLeft());
+                }
+                else {
+                    parent.setRight(replacement.getLeft());
+                }
+
+                replacement.setLeft(root.getLeft());
+                replacement.setRight(root.getRight());
+                root = replacement;
+            }
+        }
+        else {
+            if (curr.getRight() == null && curr.getLeft() == null) {
+                if (lastDir == -1) {
+                    previous.setLeft(null);
+                }
+                if (lastDir == 1) {
+                    previous.setRight(null);
+                }
+                curr = null;
+            }
+            else if (curr.getRight() == null && curr.getLeft() != null) {
+                if (lastDir == -1) {
+                    previous.setLeft(curr.getLeft());
+                }
+                if (lastDir == 1) {
+                    previous.setRight(curr.getLeft());
+                }
+                curr = null;
+            }
+            else if (curr.getLeft() == null && curr.getRight() != null) {
+                if (lastDir == -1) {
+                    previous.setLeft(curr.getRight());
+                }
+                if (lastDir == 1) {
+                    previous.setRight(curr.getRight());
+                }
+                curr = null;
+            }
+            else {
+
+                BinaryNode<T> replacement = curr.getLeft();
+                BinaryNode<T> parent = curr;
+
+                while (replacement.getRight() != null) {
+                    parent = replacement;
+                    replacement = replacement.getRight();
+                } 
+
+                if (parent == curr) {
+                    parent.setLeft(replacement.getLeft());
+                }
+                else {
+                    parent.setRight(replacement.getLeft());
+                }
+
+                replacement.setLeft(curr.getLeft());
+                replacement.setRight(curr.getRight());
+
+                if (lastDir == -1) {
+                    previous.setLeft(replacement);
+                }
+                else {
+                    previous.setRight(replacement);
+                }   
+            }
+        }
     }
 
     // Restructures this BST to be optimally balanced
     public void balance()
     {
+        List<T> elements = inorderTraverse();
+
+        root = balance(elements, 0, elements.size()-1);
+    }
+
+    private BinaryNode<T> balance(List<T> list, int start, int end) {
+        if (start > end) {
+            return null;
+        }
+
+        int middle = (start+end)/2;
+
+        BinaryNode<T> node = new BinaryNode<T>(list.get(middle));
+
+        node.setLeft(balance(list, start, middle-1));
+        node.setRight(balance(list, middle+1, end));
+
+        return node;
     }
 }
